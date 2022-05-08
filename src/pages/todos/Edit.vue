@@ -41,7 +41,7 @@ import authHeader from '../../services/auth-header';
 import Datepicker from 'vue3-date-time-picker';
 import 'vue3-date-time-picker/dist/main.css'
 export default {
-    name:"Edit Assignment",
+    name:"Edit Todo",
     components: { Datepicker },
     data() {
         return {
