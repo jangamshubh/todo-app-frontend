@@ -9,7 +9,7 @@
                 </div>
                 <div class="field p-fluid">
                     <label for="name1">Title</label>
-                    <InputText id="name1" type="text" v-model="v$.todo.name.$model"/>
+                    <InputText id="name1" type="text" v-model="v$.todo.title.$model"/>
                 </div>
                 <div class="field p-fluid">
                     <label for="description1">Description</label>
@@ -17,7 +17,7 @@
                 </div>
                 <div class="field p-fluid">
                     <label for="deadline1">Deadline</label>
-                    <Datepicker id="deadline1" v-model="v$.todo.end_date_time.$model" :format="'d-M-Y HH:ii'"/>
+                    <Datepicker id="deadline1" v-model="v$.todo.deadline.$model" :format="'d-M-Y HH:ii'"/>
                 </div>
                 <div class="field p-fluid">
                     <label for="priority1">Priority</label>
@@ -27,7 +27,7 @@
                     <label for="status1">Status</label>
                     <Dropdown id="status1" v-model="v$.todo.status.$model" :options="status" optionLabel="name" optionValue="id" placeholder="Status"/>
                 </div>
-                <Button label="Submit" @click="saveTodo"></Button>
+                <Button label="Submit" v-on:click="saveTodo()" :disabled="v$.todo.$invalid"></Button>
             </div>
         </div>
     </div>
@@ -52,16 +52,15 @@ export default {
                 priority: '',
                 status: '',
             },
-            file: '',
-            priorites: [
-                { name: 'Low', id: 0 },
-                { name: 'Medium', id: 1 },
-                { name: 'High', id: 2 }
+            priorities: [
+                { name: 'Low', id: 'Low' },
+                { name: 'Medium', id: 'Medium' },
+                { name: 'High', id: 'High' }
             ],
             status: [
-                { name: 'Pending', id: 0 },
-                { name: 'In Progress', id: 1 },
-                { name: 'Done', id: 2 },
+                { name: 'Pending', id: 'Pending' },
+                { name: 'In Progress', id: 'In Progress' },
+                { name: 'Done', id: 'Done' },
             ],
         };
     },

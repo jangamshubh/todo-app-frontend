@@ -4,7 +4,7 @@
             <Card>
 				<template v-slot:title>
 					<div class="flex align-items-center justify-content-between mb-0">
-						<h5>View Assignment Details</h5>
+						<h5>View Todo Details</h5>
                         <Button icon="pi pi-arrow-left" class="p-button-rounded mr-2 mb-2" @click="redirectToIndex()"/>
                     </div>
                 </template>
@@ -12,93 +12,37 @@
                     <table class="min-w-full border divide-y divide-gray-200">
                         <tbody class="bg-white divide-y divide-gray-200 divide-solid">
                             <tr class="bg-white">
-                                <th>Name</th>
+                                <th>Title</th>
                                 <td class="px-6 py-4 text-sm leading-5 text-gray-900 whitespace-no-wrap">
-                                    {{ assignment.name }}
+                                    {{ todo.title }}
                                 </td>
                             </tr>
                             <tr>
                                 <th>Description</th>
                                 <td class="px-6 py-4 text-sm leading-5 text-gray-900 whitespace-no-wrap">
-                                    {{ assignment.description }}
+                                    {{ todo.description }}
                                 </td>
                             </tr>
                             <tr>
-                                <th>Rubric</th>
+                                <th>Deadline</th>
                                 <td class="px-6 py-4 text-sm leading-5 text-gray-900 whitespace-no-wrap">
-                                    {{ assignment.rubric }}
+                                    {{ todo.deadline }}
                                 </td>
                             </tr>
                             <tr>
-                                <th>Assignment Start Date Time</th>
+                                <th>Priority</th>
                                 <td class="px-6 py-4 text-sm leading-5 text-gray-900 whitespace-no-wrap">
-                                    {{ assignment.start_date_time }}
+                                    {{ todo.priority }}
                                 </td>
                             </tr>
                             <tr>
-                                <th>Assignment End Date Time</th>
+                                <th>Status</th>
                                 <td class="px-6 py-4 text-sm leading-5 text-gray-900 whitespace-no-wrap">
-                                    {{ assignment.end_date_time }}
+                                    {{ todo.status }}
                                 </td>
-                            </tr>
-                            <tr>
-                                <th>Late Submission Allowed ?</th>
-                                <td class="px-6 py-4 text-sm leading-5 text-gray-900 whitespace-no-wrap" v-if="assignment.allow_late_submision == 1">
-                                    Yes
-                                </td>
-                                <td v-else class="px-6 py-4 text-sm leading-5 text-gray-900 whitespace-no-wrap">No</td>
-                            </tr>
-                            <tr>
-                                <th>File Link</th>
-                                <td class="px-6 py-4 text-sm leading-5 text-gray-900 whitespace-no-wrap">
-                                    <Button icon="pi pi-cloud" label="View File" class="p-button-rounded mr-2 mb-2" @click="openFile(assignment.file_link)"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Teacher</th>
-                                <td class="px-6 py-4 text-sm leading-5 text-gray-900 whitespace-no-wrap">
-                                    {{ assignment.assignment_get_teachers.name }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Visibility ?</th>
-                                <td class="px-6 py-4 text-sm leading-5 text-gray-900 whitespace-no-wrap" v-if="assignment.visibility == 1">
-                                    Published
-                                </td>
-                                <td v-else>Draft</td>
                             </tr>
                         </tbody>
                     </table>
-                </template>
-            </Card>
-            <hr>
-            <Card>
-				<template v-slot:title>
-					<div class="flex align-items-center justify-content-between mb-0">
-						<h5>View Batch Details</h5>
-                    </div>
-                </template>
-                <template v-slot:content>
-                    <DataTable :value="batches" :paginator="true" class="p-datatable-gridlines" :rows="10" dataKey="id" :rowHover="true"
-                    v-model:filters="filters1" filterDisplay="menu" :loading="loading1" :filters="filters1" responsiveLayout="scroll"
-                    :globalFilterFields="['']">
-                        <template #empty>
-                            No data found.
-                        </template>
-                        <template #loading>
-                            Loading data. Please wait.
-                        </template>
-                        <Column field="classroom" header="Classroom" style="min-width:12rem">
-                            <template #body="{data}">
-                                {{ data.classroom_batch_get_classrooms.name }}
-                            </template>
-                        </Column>
-                        <Column field="batch" header="Batch" style="min-width:12rem">
-                            <template #body="{data}">
-                                {{ data.classroom_batch_get_batches.name }}
-                            </template>
-                        </Column>
-                    </DataTable>
                 </template>
             </Card>
         </div>
@@ -111,15 +55,7 @@ import authHeader from '../../services/auth-header';
 export default {
     data() {
         return {
-            assignment:{
-                assignment_get_subjects: {
-                    name: '',
-                },
-                assignment_get_teachers: {
-                    name: '',
-                },
-            },
-            batches:[],
+            todo:{},
             filters1:null,
             loading1: true,
             loading2: true,
@@ -139,7 +75,7 @@ export default {
     created() {
         this.checkUserLogin();
         this.checkUserRole();
-        this.getAssignment();
+        this.getTodo();
     },
     methods: {
         checkUserLogin() {
@@ -148,27 +84,23 @@ export default {
             }
         },
         checkUserRole() {
-            if(this.checkRole != 'Super Admin' && this.checkRole != 'Teacher' && this.checkRole != 'Student') {
+            if(this.checkRole != 'Super Admin' && this.checkRole != 'Normal User') {
                this.$router.push("/");
            }
         },
-        openFile(link) {
-            window.open(link, '_blank');
-        },
-        getAssignment() {
-            axios.get(`${process.env.VUE_APP_API_URL}/assignments/${this.$route.params.id}/show`,{ headers: authHeader() }).then(data => {
+        getTodo() {
+            axios.get(`${process.env.VUE_APP_API_URL}/todos/${this.$route.params.id}/show`,{ headers: authHeader() }).then(data => {
                 let response = data.data;
                 if(response.status == 'success') {
-                    this.assignment = response.assignment;
-                    this.batches = response.batches;
+                    this.todo = response.data;
                     this.loading1 = false;
                 } else {
-                    this.$router.push({ name: 'assignments.index' });
+                    this.$router.push({ name: 'todos.index' });
                 }
             })
         },
         redirectToIndex() {
-            this.$router.push({ name: 'assignments.index' });
+            this.$router.push({ name: 'todos.index' });
         },
     },
 }
