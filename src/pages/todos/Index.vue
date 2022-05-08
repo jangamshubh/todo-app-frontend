@@ -1,6 +1,7 @@
 <template>
     <div class="grid">
         <div class="col-12">
+            <Toast />
             <div class="card">
                 <div class="card-header flex justify-content-between flex-column sm:flex-row">
                     <h5>Todos</h5>
@@ -51,9 +52,20 @@
                         <template #body="data">
                             <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" @click="editTodo(data.data)" />
                             <Button icon="pi pi-eye" class="p-button-rounded p-button-info mr-2" @click="showTodo(data.data)" />
+                            <Button icon="pi pi-trash" class="p-button-rounded p-button-warning mr-2" @click="confirmDeleteTodo(data.data)" />
                         </template>
                     </Column>
                 </DataTable>
+                <Dialog v-model:visible="deleteTodoDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
+                    <div class="flex align-items-center justify-content-center">
+                        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+                        <span v-if="todo_data">Are you sure you want to delete <b>{{ todo_data.title }}</b>?</span>
+                    </div>
+                    <template #footer>
+                        <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteTodoDialog = false"/>
+                        <Button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteTodo(todo_data.id)" />
+                    </template>
+                </Dialog>
             </div>
         </div>
     </div>
@@ -70,6 +82,7 @@ export default {
             filters2: {},
             loading1: true,
             loading2: true,
+            deleteTodoDialog: false,
         }
     },
     computed: {
@@ -125,6 +138,20 @@ export default {
         },
         showTodo(data) {
             this.$router.push({ name: 'todos.show', params: { id: data.id }});
+        },
+        confirmDeleteTodo(data) {
+			this.todo_data = data;
+			this.deleteTodoDialog = true;
+		},
+        deleteTodo(id){
+            axios.get(`${process.env.VUE_APP_API_URL}/todos/${id}/delete`, { headers: authHeader() }).then(() => {
+                this.getAllTodos();
+                this.deleteTodoDialog = false;
+                this.showDeleteSuccess();
+            })
+        },
+        showDeleteSuccess() {
+            this.$toast.add({ severity:'success', summary: 'Todo Deleted Successfully', detail:'', life: 3000 });
         },
         redirectToCreatePage() {
             this.$router.push({ name: 'todos.create' });
